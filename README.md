@@ -17,8 +17,6 @@ structured **JSON** with **compiler-style diagnostics**.
 - `jflex/MedLexer.flex` - JFlex specification (code used to generate the lexer)
 - `src/` - Java source code (application + parser + semantics)
 - `samples/` - sample MedScript programs for demos/tests
-- `docs/` - report and presentation
-- `screenshots/` - evidence screenshots
 
 ## How to run (CLI)
 **Bash/Git Bash:**
