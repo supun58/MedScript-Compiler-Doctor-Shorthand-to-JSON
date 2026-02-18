@@ -29,7 +29,6 @@ public class Parser {
             return t;
         }
         diags.add(Diagnostic.error(current.line, current.column, msg + " (found: " + current.type + " '" + current.lexeme + "')"));
-        // attempt simple recovery: don't consume EOF
         if (current.type != TokenType.EOF) advance();
         return new Token(type, "", current.line, current.column);
     }
@@ -62,22 +61,10 @@ public class Parser {
         public ParseResult(Program p, List<Diagnostic> d) { this.program = p; this.diagnostics = d; }
     }
 
-    // Grammar (high level):
-    // Program -> (PatientBlock)? (AllergyBlock)? RxBlock (NotesBlock)?
-    // PatientBlock -> 'patient' ID ('age' NUMBER)? ('weight' NUMBER 'kg')?
-    // AllergyBlock -> 'allergy' ID+
-    // RxBlock -> 'rx:' Medication+
-    // Medication -> FORM ID Dose (ROUTE)? FREQUENCY Duration (FOOD_MOD)? (ID)*  // extra flags
-    // Dose -> Strength (Amount)?
-    // Strength -> NUMBER UNIT | NUMBER UNIT '/' NUMBER UNIT | NUMBER '%' | NUMBER '/' NUMBER 'tab'
-    // Amount -> NUMBER UNIT (often ml)
-    // Duration -> NUMBER DURATION_UNIT
-
     public ParseResult parse() {
         Program p = new Program();
         List<Diagnostic> diags = new ArrayList<>();
 
-        // allow optional patient/allergy/notes around rx
         while (current.type != TokenType.EOF) {
             if (current.type == TokenType.SECTION_PATIENT) {
                 parsePatient(p, diags);
@@ -94,7 +81,6 @@ public class Parser {
             }
         }
 
-        // minimal syntax requirement: must have at least one medication
         if (p.medications.isEmpty()) {
             diags.add(Diagnostic.error(1, 1, "No medications found. Add an 'rx:' section with at least one medication."));
         }
@@ -118,12 +104,10 @@ public class Parser {
                 advance();
                 Token wTok = expect(TokenType.NUMBER, diags, "Expected weight number");
                 String val = wTok.lexeme;
-                if (match(TokenType.ID)) { /* allow 'kg' as ID */ }
-                // if next is ID and equals kg, ok; otherwise ignore
+                if (match(TokenType.ID)) 
                 try { p.patient.weightKg = Double.parseDouble(val.replace("/", ".")); }
                 catch(Exception e){ diags.add(Diagnostic.error(wTok.line, wTok.column, "Invalid weight value")); }
             } else {
-                // unknown patient attribute: skip one ID
                 diags.add(Diagnostic.warn(current.line, current.column, "Unknown patient attribute '" + current.lexeme + "' ignored"));
                 advance();
             }
@@ -132,7 +116,6 @@ public class Parser {
 
     private void parseAllergy(Program p, List<Diagnostic> diags) {
         expect(TokenType.SECTION_ALLERGY, diags, "Expected 'allergy'");
-        // one or more IDs
         int count = 0;
         while (current.type == TokenType.ID) {
             p.allergies.add(current.lexeme.toLowerCase());
@@ -146,7 +129,6 @@ public class Parser {
 
     private void parseRx(Program p, List<Diagnostic> diags) {
         expect(TokenType.SECTION_RX, diags, "Expected 'rx:'");
-        // one or more medications until next section or EOF
         while (current.type != TokenType.EOF &&
                current.type != TokenType.SECTION_PATIENT &&
                current.type != TokenType.SECTION_ALLERGY &&
@@ -172,7 +154,6 @@ public class Parser {
 
         m.dose = parseDose(diags);
 
-        // optional route
         if (current.type == TokenType.ROUTE) { m.route = current.lexeme.toLowerCase(); advance(); }
 
         Token freqTok = expect(TokenType.FREQUENCY, diags, "Expected frequency (od/bd/tds/qid/...)");
@@ -182,10 +163,8 @@ public class Parser {
 
         if (current.type == TokenType.FOOD_MOD) { m.foodMod = current.lexeme.toLowerCase(); advance(); }
 
-        // remaining IDs are treated as extra flags until a section or a new FORM (next med)
         while (current.type == TokenType.ID) {
             String flag = current.lexeme.toLowerCase();
-            // allow 'after_food' etc already tokenized but safe
             m.extras.put(flag, "true");
             advance();
         }
@@ -196,19 +175,13 @@ public class Parser {
     private Dose parseDose(List<Diagnostic> diags) {
         Dose d = new Dose();
 
-        // Strength patterns:
-        //  NUMBER UNIT
-        //  NUMBER UNIT / NUMBER UNIT   (e.g. 5mg/5ml)
-        //  NUMBER %                     (e.g. 1%)
         Token num1 = expect(TokenType.NUMBER, diags, "Expected dose number (e.g., 500 or 0.5 or 1/2)");
         String strength = num1.lexeme;
 
         if (current.type == TokenType.UNIT) {
             strength += current.lexeme;
             advance();
-            // optional / NUMBER UNIT
             if (current.type == TokenType.ID && "/".equals(current.lexeme)) {
-                // not produced by lexer; treat as fallback
             }
             if (current.type == TokenType.UNKNOWN && "/".equals(current.lexeme)) {
                 strength += "/";
@@ -219,7 +192,6 @@ public class Parser {
                 strength += unit2.lexeme;
             }
         } else if (current.type == TokenType.UNIT || current.type == TokenType.ID) {
-            // handled above
         } else if (current.type == TokenType.UNKNOWN && "%".equals(current.lexeme)) {
             strength += "%";
             advance();
@@ -233,13 +205,11 @@ public class Parser {
             strength += "%";
             advance();
         } else {
-            // unit missing
             diags.add(Diagnostic.error(current.line, current.column, "Expected unit after dose number (mg/ml/g/...)"));
         }
 
         d.strength = strength;
 
-        // Optional Amount (for Syrups etc): NUMBER UNIT (typically ml)
         if (current.type == TokenType.NUMBER) {
             Token amtNum = current;
             advance();
@@ -247,7 +217,6 @@ public class Parser {
                 d.amount = amtNum.lexeme + current.lexeme;
                 advance();
             } else {
-                // rollback idea not implemented; treat as error and continue
                 diags.add(Diagnostic.warn(amtNum.line, amtNum.column, "Possible amount provided but missing unit (e.g., '10ml')"));
             }
         }
@@ -269,7 +238,6 @@ public class Parser {
 
     private void parseNotes(Program p, List<Diagnostic> diags) {
         expect(TokenType.SECTION_NOTES, diags, "Expected 'notes:'");
-        // collect remaining IDs/NUMBERS/UNITS as note lines until next section
         StringBuilder line = new StringBuilder();
         while (current.type != TokenType.EOF &&
                 current.type != TokenType.SECTION_PATIENT &&
@@ -277,9 +245,7 @@ public class Parser {
                 current.type != TokenType.SECTION_RX &&
                 current.type != TokenType.SECTION_NOTES) {
             if (current.type == TokenType.UNKNOWN && "\n".equals(current.lexeme)) {
-                // should not happen
             }
-            // treat whitespace already skipped
             line.append(current.lexeme).append(" ");
             advance();
         }

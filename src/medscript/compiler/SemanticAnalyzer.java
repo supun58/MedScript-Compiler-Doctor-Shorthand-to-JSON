@@ -7,7 +7,6 @@ import medscript.compiler.Parser.Diagnostic;
 
 public class SemanticAnalyzer {
 
-    // Simple brand->generic map for nicer JSON output (extend as needed)
     private static final Map<String, String> GENERIC = new HashMap<>();
     static {
         GENERIC.put("pcm", "Paracetamol");
@@ -16,7 +15,7 @@ public class SemanticAnalyzer {
         GENERIC.put("hydrocortisone", "Hydrocortisone");
     }
 
-    // Example allergy conflicts (demo-level)
+    // Example allergy conflicts 
     private static final Map<String, Set<String>> ALLERGY_CONFLICTS = new HashMap<>();
     static {
         ALLERGY_CONFLICTS.put("penicillin", new HashSet<>(Arrays.asList("amox", "amoxicillin")));
@@ -25,7 +24,7 @@ public class SemanticAnalyzer {
     public List<Diagnostic> analyze(Program p) {
         List<Diagnostic> diags = new ArrayList<>();
 
-        // Required patient name (warning; not error)
+        // Required patient name 
         if (p.patient.name == null || p.patient.name.isBlank()) {
             diags.add(Diagnostic.warn(1, 1, "Patient name is missing (add: patient <Name> ...)"));
         }
@@ -49,7 +48,7 @@ public class SemanticAnalyzer {
                 diags.add(Diagnostic.error(1,1, "Duration must be > 0 for " + m.name));
             }
 
-            // Route validation: oint/cream/drops topical vs IV etc
+            // Route validation
             if (m.route != null) {
                 if ((m.form.equalsIgnoreCase("Oint") || m.form.equalsIgnoreCase("Cream")) &&
                         (m.route.equals("iv") || m.route.equals("im"))) {
@@ -57,7 +56,7 @@ public class SemanticAnalyzer {
                 }
             }
 
-            // Basic dose limit warning (demo): Paracetamol > 1000mg per dose warning
+            // Basic dose limit warning 
             if (m.name.equalsIgnoreCase("pcm") || m.name.equalsIgnoreCase("paracetamol")) {
                 if (m.dose != null && m.dose.strength != null && m.dose.strength.contains("mg")) {
                     double mg = extractFirstNumber(m.dose.strength);

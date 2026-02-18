@@ -19,7 +19,6 @@ public class MedScriptGUI extends JFrame {
     private final DefaultTableModel tokenModel = new DefaultTableModel(
             new Object[]{"Type", "Lexeme", "Line", "Col"}, 0);
 
-    // Modern color scheme
     private static final Color PRIMARY_COLOR = new Color(41, 128, 185);
     private static final Color SUCCESS_COLOR = new Color(39, 174, 96);
     private static final Color DANGER_COLOR = new Color(231, 76, 60);
@@ -35,7 +34,6 @@ public class MedScriptGUI extends JFrame {
 
         getContentPane().setBackground(BG_COLOR);
 
-        // Left: input panel with modern styling
         inputArea.setFont(new Font("Consolas", Font.PLAIN, 15));
         inputArea.setLineWrap(false);
         inputArea.setBackground(PANEL_COLOR);
@@ -52,18 +50,9 @@ public class MedScriptGUI extends JFrame {
             new Font("Segoe UI", Font.BOLD, 14),
             PRIMARY_COLOR));
 
-        // Right: output tabs with modern styling
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         tabs.setBackground(BG_COLOR);
-
-        jsonArea.setFont(new Font("Consolas", Font.PLAIN, 14));
-        jsonArea.setEditable(false);
-        jsonArea.setBackground(PANEL_COLOR);
-        jsonArea.setForeground(TEXT_COLOR);
-        jsonArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        JScrollPane jsonScroll = new JScrollPane(jsonArea);
-        tabs.addTab("JSON Output", jsonScroll);
 
         JTable tokenTable = new JTable(tokenModel);
         tokenTable.setFont(new Font("Consolas", Font.PLAIN, 13));
@@ -82,11 +71,18 @@ public class MedScriptGUI extends JFrame {
         JScrollPane diagScroll = new JScrollPane(diagArea);
         tabs.addTab("Diagnostics", diagScroll);
 
+        jsonArea.setFont(new Font("Consolas", Font.PLAIN, 14));
+        jsonArea.setEditable(false);
+        jsonArea.setBackground(PANEL_COLOR);
+        jsonArea.setForeground(TEXT_COLOR);
+        jsonArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JScrollPane jsonScroll = new JScrollPane(jsonArea);
+        tabs.addTab("JSON Output", jsonScroll);
+
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inScroll, tabs);
         split.setResizeWeight(0.5);
         split.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Modern button panel
         JPanel btns = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
         btns.setBackground(BG_COLOR);
         
@@ -101,7 +97,6 @@ public class MedScriptGUI extends JFrame {
         compileBtn.addActionListener(e -> compile());
         clearBtn.addActionListener(e -> clearAll());
         
-        // Examples dropdown menu
         JPopupMenu examplesMenu = new JPopupMenu();
         examplesMenu.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         
@@ -131,7 +126,6 @@ public class MedScriptGUI extends JFrame {
         pack();
         setLocationRelativeTo(null);
 
-        // Start with empty GUI - no initial compile
     }
 
     private JButton createStyledButton(String text, Color bgColor) {
@@ -145,7 +139,6 @@ public class MedScriptGUI extends JFrame {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setPreferredSize(new Dimension(140, 35));
         
-        // Hover effect
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 btn.setBackground(bgColor.brighter());
@@ -212,7 +205,6 @@ public class MedScriptGUI extends JFrame {
                 }
             }
             inputArea.setText(content.toString());
-            // Don't auto-compile - user will click compile button
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, 
                 "Error loading file: " + ex.getMessage(), 

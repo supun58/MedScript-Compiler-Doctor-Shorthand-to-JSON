@@ -17,24 +17,24 @@ public class AST {
     }
 
     public static class Medication {
-        public String form;     // Tab, Cap, Syr...
-        public String name;     // PCM, Amox...
-        public Dose dose;       // 500mg or 5mg/5ml + 10ml
-        public String route;    // po, iv...
-        public String freq;     // tds...
-        public Duration duration; // 5d, 2w, 1m
-        public String foodMod;  // after_food...
-        public Map<String, String> extras = new LinkedHashMap<>(); // freeform flags
+        public String form;     
+        public String name;     
+        public Dose dose;       
+        public String route;    
+        public String freq;     
+        public Duration duration; 
+        public String foodMod; 
+        public Map<String, String> extras = new LinkedHashMap<>(); 
     }
 
     public static class Dose {
-        public String strength; // e.g., 500mg or 5mg/5ml or 1%
-        public String amount;   // e.g., 10ml (for syrups) optional
+        public String strength; 
+        public String amount;   
     }
 
     public static class Duration {
         public double value;
-        public String unit; // d, w, m
+        public String unit; 
         public int toDaysRounded() {
             if ("d".equals(unit)) return (int)Math.round(value);
             if ("w".equals(unit)) return (int)Math.round(value * 7);

@@ -4,23 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
-/**
- * MedLexer.java
- *
- * This file is included as the lexer implementation used by the application.
- * A JFlex spec is provided in `jflex/MedLexer.flex` to regenerate a lexer.
- *
- * The lexer recognizes:
- * sections: patient, allergy, rx:, notes:
- * forms: Tab, Cap, Syr, Inj, Oint, Drops, Cream, Neb
- * numbers: 500, 0.5, 1/2
- * units: mg, g, ml, mcg, IU, %, drops
- * routes: po, iv, im, sc, sl, pr, topical, inhale
- * frequency: od, bd, tds, qid, hs, stat, prn, sos, q4h, q6h, ...
- * duration: NUMBER + (d|w|m)
- * food modifiers: ac, pc, with_meals, after_food, before_food
- * comments: # ...
- */
+
 public class MedLexer {
     private final String input;
     private int index = 0;
@@ -116,7 +100,6 @@ public class MedLexer {
             t = tryMatch(NUMBER, TokenType.NUMBER); if (t != null) return t;
             t = tryMatch(ID, TokenType.ID); if (t != null) return t;
 
-            // unknown single char
             String lex = remaining().substring(0, 1);
             Token unk = token(TokenType.UNKNOWN, lex);
             advance(lex);

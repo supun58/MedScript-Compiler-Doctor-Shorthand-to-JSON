@@ -1,8 +1,4 @@
 \
-/* MedLexer.flex
- * JFlex specification for MedScript.
- * (Used to generate MedLexer.java)
- */
 package medscript.compiler;
 
 import java.io.Reader;

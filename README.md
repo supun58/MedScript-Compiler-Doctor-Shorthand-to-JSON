@@ -54,5 +54,3 @@ If you have JFlex installed (or a `jflex-full-*.jar`), run:
 java -jar jflex-full-1.9.1.jar -d src/medscript/compiler jflex/MedLexer.flex
 ```
 This will generate `src/medscript/compiler/MedLexer.java`.
-
-> Note: This repository already includes a working `MedLexer.java` consistent with the spec.
