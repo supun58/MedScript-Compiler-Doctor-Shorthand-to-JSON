@@ -1,0 +1,10 @@
+# MedScript sample (semantic errors)
+patient Nimal age 22 weight 58kg
+allergy penicillin
+
+rx:
+  Cap Amox 250mg po bd 7d   # allergy conflict
+  Tab PCM 1500mg po tds 5d  # high dose warning
+  Oint Hydrocortisone 1% iv bd 7d  # invalid route for ointment
+notes:
+  stop if rash

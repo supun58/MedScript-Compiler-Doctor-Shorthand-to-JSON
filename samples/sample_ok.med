@@ -1,0 +1,10 @@
+# MedScript sample (OK)
+patient Nimal age 22 weight 58kg
+allergy none
+
+rx:
+  Tab PCM 500mg po tds 5d after_food
+  Syr Cetirizine 5mg/5ml 10ml hs 3d
+notes:
+  avoid alcohol
+  return if fever persists

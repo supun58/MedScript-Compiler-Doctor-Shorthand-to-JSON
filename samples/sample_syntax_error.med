@@ -1,0 +1,7 @@
+# MedScript sample (syntax errors)
+patient Nimal age twentyTwo
+
+rx:
+  PCM 500mg tds 5d
+  Tab 500mg po tds 5d
+notes:
